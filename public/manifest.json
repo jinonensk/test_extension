@@ -1,0 +1,40 @@
+{
+	"manifest_version": 2,
+	"name": "Test Task Usov AL",
+	"version": "0.3",
+	"permissions": [
+		"activeTab",
+		"storage"
+	],
+	"background": {
+		"scripts": [
+			"js/background.js",
+			"js/chunk-vendors.js"
+        ]
+	},
+	"content_scripts": [{
+		"all_frames": false,
+		"js": [
+			"js/content.js",
+			"js/chunk-vendors.js"
+		],		
+		"matches": [
+			"<all_urls>"
+		],
+		"run_at": "document_end"
+	}],
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+	"browser_action": {
+        "default_title": "Test Task Usov AL",
+        "default_popup": "popup.html",
+		"default_icon": {
+			"16": "img/icon_16.png"
+		}
+	},
+    "icons": {
+        "48": "img/icon_48.png"
+	},
+	"web_accessible_resources": [
+		"img/serp_16.png"
+	]
+}

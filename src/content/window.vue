@@ -6,7 +6,7 @@
     <div class="tt-window__body">
       <p>Message:</p>
       <p>
-        {{ message }}
+        {{ Message }}
       </p>
     </div>
     <div class="tt-window__button-row">
@@ -24,23 +24,19 @@
 <script>
 export default {
   props: {
-    currentName: {
+    Name: {
       type: String,
       default: '',
     },
-    currentDomain: {
+    Domain: {
       type: String,
       default: '',
     },
-    currentMessage: {
+    Message: {
       type: String,
       default: '',
     },
-    // showWindow: {
-    //   type: Boolean,
-    //   default: false,
-    // },
-    numberOfRun: {
+    Runs: {
       type: Object,
       default: () => {},
     },
@@ -50,19 +46,11 @@ export default {
       showWindow: true,
     };
   },
-  computed: {
-    message() {
-      return this.currentMessage;
-    },
-    // isShowWindow() {
-    //   return this.showWindow;
-    // },
-  },
   methods: {
     windowClose() {
       this.showWindow = false;
-      this.numberOfRun[this.currentDomain] = 3;
-      chrome.storage.local.set({ listOfRun: this.numberOfRun });
+      this.Runs[this.Domain] = 3;
+      chrome.storage.local.set({ listOfRun: this.Runs });
     },
   },
 };

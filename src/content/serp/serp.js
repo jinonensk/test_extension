@@ -21,51 +21,54 @@ export default function addSerp() {
     },
   ];
 
-  for (let i = 0; i < searchSystems.length; i++) {
-    if (searchSystems[i].domain.match(locationDomain)) {
-      merchants = document.querySelectorAll(searchSystems[i].selector);
-
-      // load current site list
-      chrome.storage.local.get(['sites'], (result) => {
-        siteListForSerp = result.sites;
-
-        for (let k = 0; k < siteListForSerp.length; k++) {
-          const siteListDomain = siteListForSerp[k].domain;
-
-          for (let j = 0; j < merchants.length; j++) {
-            const currentMerchant = merchants[j].host;
-            const currentMerchantHref = merchants[j].href;
-
-            if (currentMerchant.match(siteListDomain)) {
-              // add icon to matched sites
-              const div = document.createElement('div');
-              // div.style.backgroundImage = `url(${chrome.extension.getURL('/img/serp_16.png')})`;
-              div.id = 'test-task-serp-image';
-              document
-                .querySelector(`a[href="${currentMerchantHref}"]`)
-                .insertBefore(
-                  div,
-                  document.querySelector(`a[href="${currentMerchantHref}"]`).firstChild,
-                );
-
-              // get Url for img
-              const serpUrl = chrome.extension.getURL('/img/serp_16.png');
-
-              (function initWindow() {
-                const vm = new Vue({
-                  el: '#test-task-serp-image',
-                  render: h => h(AppSerp, {
-                    props: {
-                      serpUrl,
-                    },
-                  }),
-                });
-              }());
-            }
-          }
-        }
-      });
+  const checkDomain = async (sites, domain) => {
+    for (let i = 0; i < sites.length; i++) {
+      if (sites[i].domain.match(domain)) {
+        merchants = document.querySelectorAll(sites[i].selector);
+      }
     }
-  }
-}
+    await merchants;
+    return merchants;
+  };
 
+  checkDomain(searchSystems, locationDomain);
+
+  // load current site list
+  chrome.storage.local.get(['sites'], (result) => {
+    siteListForSerp = result.sites;
+
+    for (let k = 0; k < siteListForSerp.length; k++) {
+      const siteListDomain = siteListForSerp[k].domain;
+
+      for (let j = 0; j < merchants.length; j++) {
+        const [currentMerchant, currentMerchantHref] = [merchants[j].host, merchants[j].href];
+
+        if (currentMerchant.match(siteListDomain)) {
+          // add icon to matched sites
+          const div = document.createElement('div');
+          div.id = 'test-task-serp-image';
+          document
+            .querySelector(`a[href="${currentMerchantHref}"]`)
+            .insertBefore(
+              div,
+              document.querySelector(`a[href="${currentMerchantHref}"]`).firstChild,
+            );
+
+          // get Url for img
+          const serpUrl = chrome.extension.getURL('/img/serp_16.png');
+
+          (function initWindow() {
+            const vm = new Vue({
+              el: '#test-task-serp-image',
+              render: h => h(AppSerp, {
+                props: {
+                  serpUrl,
+                },
+              }),
+            });
+          }());
+        }
+      }
+    }
+  });
+}

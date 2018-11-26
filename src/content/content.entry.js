@@ -2,6 +2,26 @@ import Vue from 'vue';
 import AppWindow from './window.vue';
 import addSerp from './serp/serp';
 
+const runMax = 3;
+
+const initWindow = (Name, Domain, Message, Runs) => {
+  if (document.getElementsByTagName('body').length < 1) {
+    setTimeout(initWindow, 100);
+  } else {
+    window.huy = new Vue({
+      el: '#test-task-window',
+      render: h => h(AppWindow, {
+        props: {
+          Name,
+          Domain,
+          Message,
+          Runs,
+        },
+      }),
+    });
+  }
+};
+
 addSerp();
 
 // load current site list
@@ -10,9 +30,10 @@ chrome.storage.local.get(['sites'], (result) => {
   const locationDomain = location.hostname;
 
   for (let i = 0; i < siteList.length; i++) {
-    const siteListDomain = siteList[i].domain;
+    const [currentName, currentDomain, currentMessage]
+    = [siteList[i].name, siteList[i].domain, siteList[i].message];
 
-    if (locationDomain.match(siteListDomain)) {
+    if (locationDomain.match(currentDomain)) {
       // create place for vue component
       const div = document.createElement('div');
       div.id = 'test-task-window';
@@ -23,34 +44,14 @@ chrome.storage.local.get(['sites'], (result) => {
       chrome.storage.local.get(['listOfRun'], (res) => {
         numberOfRun = res.listOfRun || {};
 
-        numberOfRun[siteList[i].domain]
-        ? numberOfRun[siteList[i].domain]++
-        : numberOfRun[siteList[i].domain] = 1;
+        numberOfRun[currentDomain]
+        ? numberOfRun[currentDomain]++
+        : numberOfRun[currentDomain] = 1;
 
-        if (numberOfRun[siteList[i].domain] <= 3) {
-          // const isShow = true;
+        if (numberOfRun[siteList[i].domain] <= runMax) {
           chrome.storage.local.set({ listOfRun: numberOfRun });
 
-          (function initWindow() {
-            if (document.getElementsByTagName('body').length < 1) {
-              setTimeout(initWindow, 100);
-
-              // render vue component
-            } else {
-              window.huy = new Vue({
-                el: '#test-task-window',
-                render: h => h(AppWindow, {
-                  props: {
-                    // showWindow: isShow,
-                    currentName: siteList[i].name,
-                    currentDomain: siteList[i].domain,
-                    currentMessage: siteList[i].message,
-                    numberOfRun,
-                  },
-                }),
-              });
-            }
-          }());
+          initWindow(currentName, currentDomain, currentMessage, numberOfRun);
         }
       });
     }
